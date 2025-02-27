@@ -9,6 +9,7 @@ buildscript {
     ext {
         opensearch_group = "org.opensearch"
         isSnapshot = "true" == System.getProperty("build.snapshot", "true")
+        build_tools = "2.18.0-SNAPSHOT"
         opensearch_version = System.getProperty("opensearch.version", "2.18.0-SNAPSHOT")
         buildVersionQualifier = System.getProperty("build.version_qualifier", "")
 
@@ -22,11 +23,24 @@ buildscript {
             opensearch_build += "-SNAPSHOT"
         }
 
-        common_utils_version = System.getProperty("common_utils.version", opensearch_build)
+        common_utils_version = System.getProperty("common_utils.version", opensearch_version)
         kotlin_version = System.getProperty("kotlin.version", "1.9.23")
     }
 
+    String cldrMavenUrl="http://nexus-private.hortonworks.com/nexus/content/groups/public"
+    String gbnUrl="http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/63816725/solr/0.x/maven-repository"
+
     repositories {
+        maven {
+            url gbnUrl
+            setAllowInsecureProtocol(true);
+            allowInsecureProtocol=true
+        }
+        maven {
+            url cldrMavenUrl
+            setAllowInsecureProtocol(true);
+            allowInsecureProtocol=true
+        }
         mavenLocal()
         maven { url "https://aws.oss.sonatype.org/content/repositories/snapshots" }
         mavenCentral()
@@ -35,7 +49,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "${opensearch_group}.gradle:build-tools:${opensearch_version}"
+        classpath "${opensearch_group}.gradle:build-tools:${build_tools}"
         classpath "gradle.plugin.com.dorongold.plugins:task-tree:1.5"
         configurations.all {
             resolutionStrategy {
@@ -56,7 +70,7 @@ apply plugin: "com.dorongold.task-tree"
 
 allprojects {
     group = 'org.opensearch'
-    version = opensearch_build
+    version = opensearch_version
 
     apply from: "$rootDir/build-tools/repositories.gradle"
 
